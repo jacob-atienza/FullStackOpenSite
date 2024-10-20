@@ -1,7 +1,7 @@
 ﻿const express = require('express')
 const app = express()
 const cors = require('cors')
-
+app.use(express.static('dist'))
 app.use(cors())
 let persons = [
   {
@@ -41,7 +41,7 @@ app.get('/api/persons/:id', (request, response) => {
 //another change
 app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
-  persons.filter(person => person.id !== id)
+  persons = persons.filter(person => person.id !== id);
   response.status(204).end()
 })
 
@@ -49,11 +49,12 @@ app.use(express.json())
 app.post('/api/persons', (request, response) => {
   const body = request.body;
 
-  if(!persons.find(person => person.name === request.body.name)) {
+  if (persons.find(person => person.name === request.body.name)) {
     return response.status(400).json({
       error: 'Name already exists'
     })
   }
+
   if (!body.name || !body.number) {
     return response.status(400).json({
       error: 'Name or number missing'
