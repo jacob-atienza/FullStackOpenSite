@@ -2,7 +2,7 @@
 const app = express()
 require('dotenv').config()
 
-const Person = require('./models/Person')
+const Person = require('./models/person')
 
 let people = []
 
