@@ -1,7 +1,12 @@
 ﻿const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
-const Person = require('./models/person.js')
+
+if (!process.env.MONGODB_URI) {
+  console.error('MONGODB_URI is not set')
+}
+console.log('Environment Variables:', process.env)
+const Person = require('./models/person')
 
 const app = express()
 app.use(cors())
