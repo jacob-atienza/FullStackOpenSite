@@ -9,11 +9,11 @@ GET http://localhost:3001/api/info
 
 ###
 
-DELETE http://localhost:3001/api/persons/1
+DELETE http://localhost:3001/api/people/1
 
 ###
 
-POST localhost:3001/api/persons
+POST localhost:3001/api/people
 Content-Type: application/json
 
 {

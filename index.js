@@ -10,13 +10,13 @@ const cors = require('cors')
 app.use(cors())
 app.use(express.json())
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/people', (request, response) => {
   Person.find({}).then(people => {
     response.json(people)
   })
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/people', (request, response) => {
   const body = request.body
 
   if (body.name === undefined) {
@@ -32,13 +32,13 @@ app.post('/api/persons', (request, response) => {
   })
 })
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/people', (request, response) => {
   people.findById(request.params.id).then(person => {
     response.json(person)
   })
 })
 
-app.delete('/api/persons', (request, response) => {
+app.delete('/api/people', (request, response) => {
   const id = Number(request.params.id)
   people = people.filter(person => person.id !== id)
   response.status(204).end()
