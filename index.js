@@ -5,8 +5,8 @@ const Person = require('./models/person')
 
 const app = express()
 app.use(cors())
-app.use(express.json())
 app.use(express.static('dist'))
+app.use(express.json())
 
 app.get('/api/people', (request, response) => {
   Person.find({})
@@ -18,12 +18,8 @@ app.get('/api/people', (request, response) => {
     })
 })
 
-app.post('/api/people', (request, response) => {
+app.post('/api/people', (request, response, next) => {
   const body = request.body
-
-  if (body.name === undefined) {
-    return response.status(400).json({ error: 'Content Missing' })
-  }
 
   const person = new Person({
     name: body.name,
@@ -35,9 +31,7 @@ app.post('/api/people', (request, response) => {
     .then(savedPerson => {
       response.json(savedPerson)
     })
-    .catch(error => {
-      response.status(500).json({ error: 'Failed to save person' })
-    })
+    .catch(error => next(error)) // Pass any errors to the error handler
 })
 
 app.get('/api/people/:id', (request, response) => {
@@ -49,20 +43,38 @@ app.get('/api/people/:id', (request, response) => {
         response.status(404).json({ error: 'Person not found' })
       }
     })
-    .catch(error => {
-      response.status(500).json({ error: 'Failed to fetch person' })
-    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/people/:id', (request, response) => {
-  Person.findByIdAndDelete(request.params.id)
-    .then(() => {
-      response.status(204).end()
+  Person.findByIdAndDelete(
+    request.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: 'query' }
+  )
+    .then(updatedPerson => {
+      response.json(updatedPerson)
     })
     .catch(error => {
       response.status(500).json({ error: 'Failed to delete person' })
     })
 })
+
+app.use(unknownEndpoint)
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+
+// this has to be the last loaded middleware, also all the routes should be registered before this!
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001 // Default to 3001 if PORT not set
 app.listen(PORT, () => {
