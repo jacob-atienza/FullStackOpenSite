@@ -1,7 +1,7 @@
 ﻿
 
 ###
-GET http://localhost:3001/api/persons
+GET http://localhost:3001/api/people
 
 ###
 
@@ -13,11 +13,11 @@ DELETE http://localhost:3001/api/persons/1
 
 ###
 
-POST localhost:3001/api/persons
+POST localhost:3001/api/people
 Content-Type: application/json
 
 {
-  "name": "Jacob Atienza",
+  "name": "Jacob Peralta",
   "number": "885-511-6869"
 }
 

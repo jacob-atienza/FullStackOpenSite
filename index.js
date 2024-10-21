@@ -1,83 +1,50 @@
 ﻿const express = require('express')
 const app = express()
+require('dotenv').config()
+
+const Person = require('./models/Person')
+
+let people = []
+
 const cors = require('cors')
-app.use(express.static('dist'))
 app.use(cors())
-let persons = [
-  {
-    "id": "1",
-    "name": "Arto Hellas",
-    "number": "040-123456"
-  },
-  {
-    "id": "2",
-    "name": "Ada Lovelace",
-    "number": "39-44-5323523"
-  },
-  {
-    "id": "3",
-    "name": "Dan Abramov",
-    "number": "12-43-234345"
-  },
-  {
-    "id": "4",
-    "name": "Mary Poppendieck",
-    "number": "39-23-6423122"
+app.use(express.json())
+
+app.get('/api/people', (request, response) => {
+  Person.find({}).then(people => {
+    response.json(people)
+  })
+})
+
+app.post('/api/people', (request, response) => {
+  const body = request.body
+
+  if (body.name === undefined) {
+    return response.status(400).json({ error: 'Content Missing' })
   }
-]
-app.get('/api/persons', (request, response) => {
-  response.json(persons)
+
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 })
 
-app.get('/api/info', (request, response) => {
-  response.send(`Phonebook has info for ${persons.length} persons <br /> ${new Date} `)
+app.get('/api/people', (request, response) => {
+  people.findById(request.params.id).then(person => {
+    response.json(person)
+  })
 })
 
-app.get('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  const person = persons.find(person => person.id === id)
-  response.json(person)
-})
-//another change
-app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  persons = persons.filter(person => person.id !== id);
+app.delete('/api/people', (request, response) => {
+  const id = Number(request.params.id)
+  people = people.filter(person => person.id !== id)
   response.status(204).end()
 })
 
-app.use(express.json())
-app.post('/api/persons', (request, response) => {
-  const body = request.body;
-
-  if (persons.find(person => person.name === request.body.name)) {
-    return response.status(400).json({
-      error: 'Name already exists'
-    })
-  }
-
-  if (!body.name || !body.number) {
-    return response.status(400).json({
-      error: 'Name or number missing'
-    });
-  }
-
-  const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number,
-  };
-  persons = persons.concat(person);
-  response.json(person)
-})
-
-const generateId = () => {
-  const maxId = persons.length > 0
-      ? Math.max(...persons.map(n => Number(n.id)))
-      : 0
-  return String(maxId + 1)
-}
-
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server started on port ${PORT}`)
 })
